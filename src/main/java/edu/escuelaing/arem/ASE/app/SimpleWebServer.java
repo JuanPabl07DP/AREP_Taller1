@@ -7,12 +7,13 @@ import edu.escuelaing.arem.ASE.app.service.MovieService;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 /**
- * Clase que implementa un servidor web simple para servir archivos estáticos y manejar
- * solicitudes REST para operaciones relacionadas con películas.
+ * Clase principal que implementa un servidor web simple con soporte para solicitudes
+ * REST y archivos estáticos.
  */
 public class SimpleWebServer {
     private static final int PORT = 8080;
@@ -20,11 +21,21 @@ public class SimpleWebServer {
     public static final Map<String, RESTService> services = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
+        System.out.println("===========================================");
+        System.out.println("          Servidor iniciado");
+        System.out.println("===========================================");
+        System.out.println("Escuchando en puerto: " + PORT);
+        System.out.println("Directorio raíz: " + WEB_ROOT);
+        System.out.println("===========================================");
+
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
         ServerSocket serverSocket = new ServerSocket(PORT);
         addServices();
+
         while (true) {
             Socket clientSocket = serverSocket.accept();
+            System.out.println("\n>>> Nueva conexión recibida desde: " +
+                    clientSocket.getInetAddress().getHostAddress());
             threadPool.submit(new ClientHandler(clientSocket));
         }
     }
@@ -33,11 +44,8 @@ public class SimpleWebServer {
         services.put("Movies", new MovieService());
     }
 }
-/**
- * Clase que maneja las conexiones de los clientes.
- */
+
 class ClientHandler implements Runnable {
-    // Socket del cliente.
     private Socket clientSocket;
 
     public ClientHandler(Socket socket) {
@@ -52,71 +60,109 @@ class ClientHandler implements Runnable {
 
             String requestLine = in.readLine();
             if (requestLine == null) return;
+
             String[] tokens = requestLine.split(" ");
             String method = tokens[0];
             String fileRequested = tokens[1];
 
+            System.out.println(">>> Request Line: " + requestLine);
+            System.out.println(">>> Method: " + method);
+            System.out.println(">>> Path: " + fileRequested);
+
             if (fileRequested.startsWith("/api/movies")) {
+                System.out.println(">>> API Request");
+                System.out.println(">>> Processing " + method + " request");
                 handleAPIRequest(method, fileRequested, out, dataOut);
             } else {
+                System.out.println(">>> Static File Request");
+                System.out.println(">>> Serving file: " + fileRequested);
                 if (fileRequested.equals("/")) fileRequested = "/index.html";
                 handleFileRequest(fileRequested, out, dataOut);
             }
 
+            System.out.println(">>> Request completed\n");
+
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(">>> Error processing request: " + e.getMessage());
         }
     }
     /**
-     * Maneja solicitudes relacionadas con la API REST de películas.
+     * Maneja solicitudes a la API REST.
      *
      * @param method        Método HTTP (GET, POST, PUT, DELETE).
      * @param fileRequested Ruta solicitada.
-     * @param out           Escritor para enviar cabeceras HTTP.
-     * @param dataOut       Flujo de datos para enviar el cuerpo de la respuesta.
+     * @param out           Flujo de salida para encabezados HTTP.
+     * @param dataOut       Flujo de salida para datos HTTP.
      * @throws IOException Si ocurre un error de E/S.
      */
     private void handleAPIRequest(String method, String fileRequested, PrintWriter out, BufferedOutputStream dataOut) throws IOException {
         String query = fileRequested.contains("?") ? fileRequested.split("\\?")[1] : "";
         Map<String, String> params = parseQueryParams(query);
 
+        System.out.println("\n>>> Procesando solicitud " + method + " para películas");
         String response = switch (method) {
-            case "GET" -> SimpleWebServer.services.get("Movies").response("getAll", "");
-            case "POST" -> SimpleWebServer.services.get("Movies").response("save",
-                    params.get("title"), params.get("director"), params.get("year"));
-            case "PUT" -> SimpleWebServer.services.get("Movies").response("update",
-                    params.get("id"), params.get("title"), params.get("director"), params.get("year"));
-            case "DELETE" -> SimpleWebServer.services.get("Movies").response("delete", params.get("id"));
-            default -> "Method Not Allowed";
+            case "GET" -> {
+                System.out.println(">>> Obteniendo todas las películas...");
+                yield SimpleWebServer.services.get("Movies").response("getAll", "");
+            }
+            case "POST" -> {
+                System.out.println(">>> Creando nueva película...");
+                System.out.println(">>> Título: " + params.get("title"));
+                System.out.println(">>> Director: " + params.get("director"));
+                System.out.println(">>> Año: " + params.get("year"));
+                String postResponse = SimpleWebServer.services.get("Movies").response("save",
+                        params.get("title"), params.get("director"), params.get("year"));
+                if (postResponse.startsWith("Error:")) {
+                    System.out.println(">>> Error: Película duplicada");
+                    sendError(out, 409, "Película duplicada");
+                    yield postResponse;
+                }
+                yield postResponse;
+            }
+            case "PUT" -> {
+                System.out.println(">>> Actualizando película con ID: " + params.get("id"));
+                System.out.println(">>> Nuevo título: " + params.get("title"));
+                System.out.println(">>> Nuevo director: " + params.get("director"));
+                System.out.println(">>> Nuevo año: " + params.get("year"));
+                yield SimpleWebServer.services.get("Movies").response("update",
+                        params.get("id"), params.get("title"), params.get("director"), params.get("year"));
+            }
+            case "DELETE" -> {
+                System.out.println(">>> Eliminando película con ID: " + params.get("id"));
+                yield SimpleWebServer.services.get("Movies").response("delete", params.get("id"));
+            }
+            default -> {
+                System.out.println(">>> Método no permitido: " + method);
+                yield "Method Not Allowed";
+            }
         };
+        System.out.println(">>> Respuesta: " + response);
 
-        sendJSONResponse(out, dataOut, response);
+        if (!method.equals("POST") || !response.startsWith("Error:")) {
+            sendJSONResponse(out, dataOut, response);
+        }
     }
     /**
      * Maneja solicitudes de archivos estáticos.
-     *
-     * @param fileRequested Ruta del archivo solicitado.
-     * @param out           Escritor para enviar cabeceras HTTP.
-     * @param dataOut       Flujo de datos para enviar el contenido del archivo.
-     * @throws IOException Si ocurre un error de E/S.
      */
     private void handleFileRequest(String fileRequested, PrintWriter out, BufferedOutputStream dataOut) throws IOException {
         File file = new File(SimpleWebServer.WEB_ROOT, fileRequested);
         if (file.exists()) {
-            byte[] fileData = readFileData(file);
+            byte[] fileData = Files.readAllBytes(file.toPath());
             sendResponse(out, dataOut, fileData, getContentType(fileRequested));
         } else {
             sendError(out, 404, "File Not Found");
         }
     }
 
-    //Parseo
     private Map<String, String> parseQueryParams(String query) {
         Map<String, String> params = new HashMap<>();
         if (!query.isEmpty()) {
             for (String param : query.split("&")) {
                 String[] keyValue = param.split("=");
-                params.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+                if (keyValue.length == 2) {
+                    params.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+                }
             }
         }
         return params;
@@ -160,13 +206,5 @@ class ClientHandler implements Runnable {
             case "svg" -> "image/svg+xml";
             default -> "text/plain";
         };
-    }
-
-    private byte[] readFileData(File file) throws IOException {
-        byte[] fileData = new byte[(int) file.length()];
-        try (FileInputStream fileIn = new FileInputStream(file)) {
-            fileIn.read(fileData);
-        }
-        return fileData;
     }
 }
