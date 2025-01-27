@@ -1,15 +1,19 @@
 package edu.escuelaing.arem.ASE.app;
-
+/**
+ * @author Juan Pablo Daza Pereira
+ */
 import edu.escuelaing.arem.ASE.app.service.RESTService;
 import edu.escuelaing.arem.ASE.app.service.MovieService;
-
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
-
+/**
+ * Clase que implementa un servidor web simple para servir archivos estáticos y manejar
+ * solicitudes REST para operaciones relacionadas con películas.
+ */
 public class SimpleWebServer {
     private static final int PORT = 8080;
     public static final String WEB_ROOT = "src/main/resources";
@@ -29,8 +33,11 @@ public class SimpleWebServer {
         services.put("Movies", new MovieService());
     }
 }
-
+/**
+ * Clase que maneja las conexiones de los clientes.
+ */
 class ClientHandler implements Runnable {
+    // Socket del cliente.
     private Socket clientSocket;
 
     public ClientHandler(Socket socket) {
@@ -60,7 +67,15 @@ class ClientHandler implements Runnable {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Maneja solicitudes relacionadas con la API REST de películas.
+     *
+     * @param method        Método HTTP (GET, POST, PUT, DELETE).
+     * @param fileRequested Ruta solicitada.
+     * @param out           Escritor para enviar cabeceras HTTP.
+     * @param dataOut       Flujo de datos para enviar el cuerpo de la respuesta.
+     * @throws IOException Si ocurre un error de E/S.
+     */
     private void handleAPIRequest(String method, String fileRequested, PrintWriter out, BufferedOutputStream dataOut) throws IOException {
         String query = fileRequested.contains("?") ? fileRequested.split("\\?")[1] : "";
         Map<String, String> params = parseQueryParams(query);
@@ -77,7 +92,14 @@ class ClientHandler implements Runnable {
 
         sendJSONResponse(out, dataOut, response);
     }
-
+    /**
+     * Maneja solicitudes de archivos estáticos.
+     *
+     * @param fileRequested Ruta del archivo solicitado.
+     * @param out           Escritor para enviar cabeceras HTTP.
+     * @param dataOut       Flujo de datos para enviar el contenido del archivo.
+     * @throws IOException Si ocurre un error de E/S.
+     */
     private void handleFileRequest(String fileRequested, PrintWriter out, BufferedOutputStream dataOut) throws IOException {
         File file = new File(SimpleWebServer.WEB_ROOT, fileRequested);
         if (file.exists()) {
@@ -88,6 +110,7 @@ class ClientHandler implements Runnable {
         }
     }
 
+    //Parseo
     private Map<String, String> parseQueryParams(String query) {
         Map<String, String> params = new HashMap<>();
         if (!query.isEmpty()) {

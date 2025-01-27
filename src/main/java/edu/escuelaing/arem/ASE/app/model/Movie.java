@@ -1,5 +1,12 @@
 package edu.escuelaing.arem.ASE.app.model;
 
+/**
+ * @author Juan Pablo Daza Pereira
+ */
+/**
+ * Clase que representa una película con atributos básicos como título,
+ * director, año de lanzamiento e identificación única.
+ */
 public class Movie {
     private static int counter = 1;
     private final int id;
@@ -7,6 +14,13 @@ public class Movie {
     private String director;
     private String year;
 
+    /**
+     * Constructor de la clase Movie. Inicializa los atributos de la película y asigna un ID único.
+     *
+     * @param title    Título de la película.
+     * @param director Director de la película.
+     * @param year     Año de lanzamiento de la película.
+     */
     public Movie(String title, String director, String year) {
         this.id = counter++;
         this.title = title;
