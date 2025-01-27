@@ -100,4 +100,4 @@ Aquí están las pruebas clave:
 Ejecuta la clase **SimpleWebServerTest**
 
 ## 🛠️**Autor**
-- **Juan Pablo Daza Pereira** 
+- **Juan Pablo Daza Pereira** (JuanPabl07DP)
