@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #B9D9EB;
+    color: #333;
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background-color: #6CB4EE;
+    width: 100%;
+    padding: 20px;
+    height: auto;
+}
+
+.title {
+    font-family: Arial, sans-serif;
+    color: #0A3871;
+    font-size: 72px;
+}
+
+.header-icon {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+section {
+    margin-top: 50px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #6CB4EE;
+    font-family: Arial, sans-serif;
+    color: #0A3871;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.footer {
+    justify-content: center;
+    padding: 25px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-family: Arial, sans-serif;
+    color: #0A3871;
+    background-color: #6CB4EE;
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    align-items: center;
+}
+
+.sobreMi {
+    margin: 0;
+    font-weight: 400;
+}
+
+.imgGit {
+    width: 30px;
+    height: auto;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    form {
+        padding: 15px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    button {
+        font-size: 14px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+}
