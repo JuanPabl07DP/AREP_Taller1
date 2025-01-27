@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEFLIX</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+<header class="header">
+    <h1 class="title">MEFLIX</h1>
+    <img src="./img/pirata.png" alt="Logo pirata" class="header-icon">
+</header>
+
+<!-- GET: List all movies -->
+<section>
+    <h2>Listar Películas (GET)</h2>
+    <button type="button" onclick="loadAllMovies()">Recargar lista de películas</button>
+    <div id="getAllMovies"></div>
+</section>
+
+<!-- POST: Add a new movie -->
+<section>
+    <h2>Añadir nueva Película (POST)</h2>
+    <form id="postMovieForm">
+        <label for="movieTitle">Título:</label>
+        <input type="text" id="movieTitle" name="title" required>
+
+        <label for="movieDirector">Director:</label>
+        <input type="text" id="movieDirector" name="director" required>
+
+        <label for="movieYear">Año:</label>
+        <input type="number" id="movieYear" name="year" required>
+
+        <button type="button" onclick="addMovie()">Añadir Película</button>
+    </form>
+    <div id="postMovieResponse"></div>
+</section>
+
+<!-- PUT: Update a movie -->
+<section>
+    <h2>Actualizar Película (PUT)</h2>
+    <form id="putMovieForm">
+        <label for="movieId">Película ID:</label>
+        <input type="text" id="movieId" name="id" required>
+
+        <label for="updateTitle">Nuevo Título:</label>
+        <input type="text" id="updateTitle" name="title">
+
+        <label for="updateDirector">Nuevo Director:</label>
+        <input type="text" id="updateDirector" name="director">
+
+        <label for="updateYear">Nuevo Año:</label>
+        <input type="number" id="updateYear" name="year">
+
+        <button type="button" onclick="updateMovie()">Actualizar Película</button>
+    </form>
+    <div id="putMovieResponse"></div>
+</section>
+
+<!-- DELETE: Delete a movie -->
+<section>
+    <h2>Eliminar Película (DELETE)</h2>
+    <form id="deleteMovieForm">
+        <label for="deleteMovieId">Película ID:</label>
+        <input type="text" id="deleteMovieId" name="id" required>
+
+        <button type="button" onclick="deleteMovie()">Eliminar Película</button>
+    </form>
+    <div id="deleteMovieResponse"></div>
+</section>
+<footer class="footer">
+    <p class="sobreMi">Creado por: <strong>JuanPabl07DP</strong> - AREP 2025-1</p>
+    <a class="github" href="https://github.com/JuanPabl07DP">
+        <img src="./img/Github_light.svg" class="imgGit">
+    </a>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
+
